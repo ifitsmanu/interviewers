@@ -49,7 +49,13 @@ class InterviewPipeline(Pipeline):
         Returns:
             str: Unique session identifier
         """
-        return await self.session_manager.create_session(candidate_id)
+        session_id = await self.session_manager.create_session(candidate_id)
+        # Start with introduction phase
+        await self.session_manager.update_session_data(
+            session_id,
+            {"current_phase": "introduction"}
+        )
+        return session_id
     
     async def get_session_data(self, session_id: str) -> Optional[Dict[str, Any]]:
         """Get data for an interview session.

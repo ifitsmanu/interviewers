@@ -7,3 +7,100 @@ services:
       - "27017:27017"
     volumes:
       - ./data/db:/data/db
+      - ./logs/mongo:/var/log/mongodb
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Service definitions will be uncommented once service implementations are complete
+  # orchestrator:
+  #   build:
+  #     context: .
+  #     dockerfile: services/orchestrator/Dockerfile
+  #   ports:
+  #     - "50051:50051"
+  #   depends_on:
+  #     mongo:
+  #       condition: service_healthy
+  #   env_file: .env
+  #   volumes:
+  #     - ./logs/orchestrator:/app/logs
+  #   healthcheck:
+  #     test: ["CMD", "grpc_health_probe", "-addr=:50051"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 3
+
+  # technical_evaluation:
+  #   build:
+  #     context: .
+  #     dockerfile: services/technical/Dockerfile
+  #   ports:
+  #     - "50052:50052"
+  #   depends_on:
+  #     orchestrator:
+  #       condition: service_healthy
+  #   env_file: .env
+  #   volumes:
+  #     - ./logs/technical:/app/logs
+  #   healthcheck:
+  #     test: ["CMD", "grpc_health_probe", "-addr=:50052"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 3
+
+  # behavioral_assessment:
+  #   build:
+  #     context: .
+  #     dockerfile: services/behavioral/Dockerfile
+  #   ports:
+  #     - "50053:50053"
+  #   depends_on:
+  #     orchestrator:
+  #       condition: service_healthy
+  #   env_file: .env
+  #   volumes:
+  #     - ./logs/behavioral:/app/logs
+  #   healthcheck:
+  #     test: ["CMD", "grpc_health_probe", "-addr=:50053"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 3
+
+  # consent_compliance:
+  #   build:
+  #     context: .
+  #     dockerfile: services/consent/Dockerfile
+  #   ports:
+  #     - "50054:50054"
+  #   depends_on:
+  #     orchestrator:
+  #       condition: service_healthy
+  #   env_file: .env
+  #   volumes:
+  #     - ./logs/consent:/app/logs
+  #   healthcheck:
+  #     test: ["CMD", "grpc_health_probe", "-addr=:50054"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 3
+
+  # metrics_collection:
+  #   build:
+  #     context: .
+  #     dockerfile: services/metrics/Dockerfile
+  #   ports:
+  #     - "50055:50055"
+  #   depends_on:
+  #     orchestrator:
+  #       condition: service_healthy
+  #   env_file: .env
+  #   volumes:
+  #     - ./logs/metrics:/app/logs
+  #   healthcheck:
+  #     test: ["CMD", "grpc_health_probe", "-addr=:50055"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 3

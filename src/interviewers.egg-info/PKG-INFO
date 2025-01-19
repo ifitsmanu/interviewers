@@ -1,3 +1,40 @@
+Metadata-Version: 2.2
+Name: interviewers
+Version: 0.1.0
+Summary: An AI-powered interview system with MongoDB persistence
+Author: AI Interview System Team
+Author-email: team@example.com
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: Programming Language :: Python :: 3.12
+Requires-Python: >=3.12
+Description-Content-Type: text/markdown
+Requires-Dist: pydantic>=2.5.0
+Requires-Dist: fastapi>=0.104.0
+Requires-Dist: numpy>=1.24.0
+Requires-Dist: python-dotenv>=1.0.0
+Requires-Dist: asyncio>=3.4.3
+Requires-Dist: aiohttp>=3.9.0
+Requires-Dist: tenacity>=8.2.0
+Requires-Dist: prometheus-client>=0.17.0
+Requires-Dist: motor>=3.3.1
+Provides-Extra: dev
+Requires-Dist: pytest>=7.4.0; extra == "dev"
+Requires-Dist: pytest-asyncio>=0.21.0; extra == "dev"
+Requires-Dist: pytest-cov>=4.1.0; extra == "dev"
+Requires-Dist: black>=23.9.1; extra == "dev"
+Requires-Dist: isort>=5.12.0; extra == "dev"
+Requires-Dist: mypy>=1.5.1; extra == "dev"
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: provides-extra
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
+
 # AI Interview System - Microservices Architecture
 
 ## Overview

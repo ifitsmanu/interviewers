@@ -71,7 +71,8 @@ class MetricsManager:
                 "technical_depth": depth_metrics.get("overall", 0.0),
                 "system_design_depth": depth_metrics.get("system_design", 0.0),
                 "coding_depth": depth_metrics.get("coding", 0.0),
-                "architecture_depth": depth_metrics.get("architecture", 0.0)
+                "architecture_depth": depth_metrics.get("architecture", 0.0),
+                "technical_score": depth_metrics.get("overall", 0.0)  # Update technical score
             }
             return await self.session_manager.update_metrics(session_id, metrics)
         except:
@@ -94,7 +95,8 @@ class MetricsManager:
                 "behavioral_indicators": indicators.get("overall", 0.0),
                 "leadership_indicators": indicators.get("leadership", 0.0),
                 "problem_solving_indicators": indicators.get("problem_solving", 0.0),
-                "collaboration_indicators": indicators.get("collaboration", 0.0)
+                "collaboration_indicators": indicators.get("collaboration", 0.0),
+                "behavioral_score": indicators.get("overall", 0.0)  # Update behavioral score
             }
             return await self.session_manager.update_metrics(session_id, metrics)
         except:

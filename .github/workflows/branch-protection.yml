@@ -1,0 +1,26 @@
+name: Branch Protection
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  branch-protection:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check branch protection
+        uses: octokit/request-action@v2.x
+        with:
+          route: PUT /repos/{repository}/branches/main/protection
+          repository: ${{ github.repository }}
+          required_status_checks: |
+            strict: true
+            contexts:
+              - test
+          enforce_admins: true
+          required_pull_request_reviews: |
+            required_approving_review_count: 1
+            dismiss_stale_reviews: true
+          restrictions: null
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

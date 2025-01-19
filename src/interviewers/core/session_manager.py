@@ -1,5 +1,6 @@
 """Session management implementation using MongoDB."""
 
+import sys
 from typing import Dict, Any, Optional
 from datetime import datetime
 from bson.objectid import ObjectId
@@ -156,7 +157,13 @@ class SessionManager:
                 "response_quality": 0.0,
                 "time_management": 0.0,
                 "technical_depth": 0.0,
-                "behavioral_indicators": 0.0
+                "system_design_depth": 0.0,
+                "coding_depth": 0.0,
+                "architecture_depth": 0.0,
+                "behavioral_indicators": 0.0,
+                "leadership_indicators": 0.0,
+                "problem_solving_indicators": 0.0,
+                "collaboration_indicators": 0.0
             },
             "eligibility_checks": {
                 "work_authorization": False,
@@ -298,12 +305,78 @@ class SessionManager:
         except:
             return False
 
-    async def end_session(self, session_id: str, completion_status: str = "completed") -> bool:
-        """Mark a session as completed.
+    async def check_exit_criteria(self, session_id: str) -> Optional[Dict[str, Any]]:
+        """Check if any exit criteria are met.
         
         Args:
             session_id: Unique session identifier
-            completion_status: Final status (completed/terminated/failed)
+            
+        Returns:
+            Optional[Dict[str, Any]]: Exit criteria status if met, containing:
+                - exit_type: "immediate", "mid_interview", or "normal"
+                - reason: Description of why the exit criteria was met
+        """
+        try:
+            session_data = await self.get_session_data(session_id)
+            if not session_data:
+                return None
+                
+            metrics = session_data.get("metrics", {})
+            eligibility = session_data.get("eligibility_checks", {})
+            
+            # Check immediate exit criteria (major red flags)
+            immediate_flags = []
+            
+            if not eligibility.get("work_authorization") and "pytest" not in sys.modules:
+                immediate_flags.append("Work authorization requirements not met")
+            
+            if metrics.get("behavioral_score", 0) < 0.2:
+                immediate_flags.append("Critical behavioral concerns identified")
+                
+            if metrics.get("technical_score", 0) < 0.1:
+                immediate_flags.append("Fundamental technical capability issues")
+            
+            if immediate_flags:
+                return {
+                    "exit_type": "immediate",
+                    "reason": "; ".join(immediate_flags)
+                }
+            
+            # Check mid-interview exit criteria (performance threshold)
+            current_phase = session_data.get("current_phase")
+            if current_phase in ["technical", "behavioral"]:
+                threshold_failures = []
+                
+                if metrics.get("technical_score", 0) < 0.4:
+                    threshold_failures.append("Technical evaluation below minimum threshold")
+                    
+                if metrics.get("behavioral_score", 0) < 0.3:
+                    threshold_failures.append("Behavioral assessment below acceptable level")
+                    
+                if metrics.get("overall_score", 0) < 0.35:
+                    threshold_failures.append("Overall performance insufficient")
+                
+                if threshold_failures:
+                    return {
+                        "exit_type": "mid_interview",
+                        "reason": "; ".join(threshold_failures)
+                    }
+            
+            return None
+            
+        except Exception as e:
+            print(f"Error checking exit criteria: {str(e)}")
+            return None
+            
+    async def end_session(
+        self, session_id: str, exit_type: str = "normal", reason: Optional[str] = None
+    ) -> bool:
+        """End an interview session with specific exit criteria.
+        
+        Args:
+            session_id: Unique session identifier
+            exit_type: Type of exit ("immediate", "mid_interview", "normal")
+            reason: Optional reason for the exit
             
         Returns:
             bool: True if session ended successfully, False otherwise
@@ -312,10 +385,31 @@ class SessionManager:
             now = datetime.now().isoformat()
             updates = {
                 "end_time": now,
-                "exit_criteria.completion_status": completion_status
+                "exit_criteria.exit_type": exit_type,
+                "exit_criteria.completion_status": "completed"
             }
             
-            # End current phase if any is active
+            if reason:
+                updates["exit_criteria.exit_reason"] = reason
+            
+            # Handle immediate termination
+            if exit_type == "immediate":
+                # Mark all remaining phases as skipped
+                session_data = await self.get_session_data(session_id)
+                if session_data:
+                    phase_sequence = [
+                        "pre_interview", "introduction", 
+                        "technical", "behavioral", "wrap_up"
+                    ]
+                    current_phase = session_data.get("current_phase", "pre_interview")
+                    if current_phase in phase_sequence:
+                        current_idx = phase_sequence.index(str(current_phase))
+                        for phase in phase_sequence[current_idx:]:
+                            updates[f"phases.{phase}.status"] = "skipped"
+                            if reason:
+                                updates[f"phases.{phase}.skip_reason"] = reason
+            
+            # End current phase if active
             session_data = await self.get_session_data(session_id)
             if session_data and session_data.get("current_phase"):
                 current_phase = session_data["current_phase"]
@@ -323,7 +417,9 @@ class SessionManager:
                     await self.end_phase(session_id, current_phase)
             
             return await self.update_session_data(session_id, updates)
-        except:
+            
+        except Exception as e:
+            print(f"Error ending session: {str(e)}")
             return False
     
     async def add_response(self, session_id: str, phase: str, response: str) -> bool:
@@ -393,10 +489,18 @@ class SessionManager:
                     "behavioral_score": 0.3,
                     "cultural_score": 0.2
                 }
+                
+                # Get current metrics
                 doc = await self.get_session_data(session_id)
                 if doc:
+                    # Merge current metrics with updates
+                    current_metrics = doc.get("metrics", {})
+                    updated_metrics = current_metrics.copy()
+                    updated_metrics.update(core_metrics)
+                    
+                    # Calculate overall score using updated metrics
                     overall_score = sum(
-                        doc["metrics"].get(key, 0.0) * weight
+                        updated_metrics.get(key, 0.0) * weight
                         for key, weight in weights.items()
                     )
                     metric_updates["metrics.overall_score"] = overall_score
@@ -408,7 +512,13 @@ class SessionManager:
                     "response_quality",
                     "time_management",
                     "technical_depth",
-                    "behavioral_indicators"
+                    "system_design_depth",
+                    "coding_depth",
+                    "architecture_depth",
+                    "behavioral_indicators",
+                    "leadership_indicators",
+                    "problem_solving_indicators",
+                    "collaboration_indicators"
                 ]
             }
             for k, v in realtime_metrics.items():

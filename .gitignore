@@ -1,52 +1,10 @@
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-
-# MongoDB
-data/
-*.wt
-*.lock
-*.turtle
-*.0
-*.1
-*.2
-mongod.lock
-storage.bson
-WiredTiger*
-journal/
-
-# Environment
 .env
-.venv
-env/
-venv/
-ENV/
-
-# IDE
-.idea/
-.vscode/
-*.swp
-*.swo
-
-# Testing
-.coverage
-htmlcov/
+*.env
+__pycache__/
+*.pyc
 .pytest_cache/
+.coverage
+coverage.xml
+.DS_Store
+logs/
+data/
